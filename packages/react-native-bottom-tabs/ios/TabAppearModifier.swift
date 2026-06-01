@@ -18,7 +18,14 @@ struct TabAppearModifier: ViewModifier {
       #endif
 
       #if os(iOS)
-        if context.index >= 4, context.props.selectedPage != context.tabData.key {
+        // UIKit only moves tabs into the system "More" navigation controller
+        // when there are MORE than 5 tab items. With <= 5 visible tabs there is
+        // no "More" tab, and the tab at index 4 is a normal, directly-selectable
+        // tab — force-selecting it on appear would hijack the user's navigation.
+        // `filteredItems` is the set of tabs actually handed to UITabBarController.
+        if context.props.filteredItems.count > 5,
+           context.index >= 4,
+           context.props.selectedPage != context.tabData.key {
           context.onSelect(context.tabData.key)
         }
       #endif
